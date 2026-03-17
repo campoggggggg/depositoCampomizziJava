@@ -18,7 +18,7 @@ public class ProvaCondizioniIf {
         }
 
         int time_2 = 22;
-        if(time < 10){
+        if(time_2 < 10){
             System.out.println("Good morning.");
         } else if (time < 18){
             System.out.println("Good day.");
