@@ -84,7 +84,7 @@ public class EsercizioArrList_2 {
                     break;
                 
                 case 5:
-                    //codice
+                    //codice per EXTRA
                     break;
 
                 case 6:
@@ -94,7 +94,7 @@ public class EsercizioArrList_2 {
                 default:
                     System.out.println("Valore invalido! Riprova.");
                     System.out.println("------------------");
-                select = 1; //se si mette un valore invalido, select torna su 1 per rientrare nel ciclo
+                    select = 1; //se si mette un valore invalido, select torna su 1 per rientrare nel ciclo
             }
         } while(select != 5);
 
