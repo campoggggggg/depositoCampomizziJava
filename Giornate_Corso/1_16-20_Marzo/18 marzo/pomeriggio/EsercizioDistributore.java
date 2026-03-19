@@ -3,7 +3,7 @@ import java.util.Scanner;
 /*
 Nota: ho finito prima e provato ad implementare un messaggio di conferma
 nel caso in cui si seleziona 2 volte di fila la stessa bevanda.
-Il resto del codice, per l'esercizio base funziona(va).
+Il resto del codice, per l'esercizio base funziona.
 */
 
 
@@ -14,7 +14,6 @@ public class EsercizioDistributore {
         System.out.println("Credito iniziale: 10E");
 
         Scanner scanner = new Scanner(System.in);
-        Scanner confirm = new Scanner(System.in); //scanner di conferma.
 
         String confirm;
         int select;             //var di selezione dello switch
@@ -31,7 +30,7 @@ public class EsercizioDistributore {
                 case 1:
                     beverageCost = 1.5;             //costo bevanda
 
-                    //Implementazione per conferma doppia selezione non finito.
+                    //Implementazione per conferma doppia selezione NON FINITO.
                     if (lastSelect == select){
 
                         do { //controllo di voler prendere nuovamente la bevanda
@@ -53,8 +52,6 @@ public class EsercizioDistributore {
                         } while (!confirm.equals("s") && !confirm.equals("n")); //continua se non digita s o n
                         
 
-
-                    }
 
                     }   
                 case 2://analogo a sopra e per i case 3 e 4
@@ -92,6 +89,7 @@ public class EsercizioDistributore {
 
         } while ((select > 0 && select <= 4) && credit > 0); //se la selezione è giusta o se si ha ancora credito
 
+        scanner.close();
     } 
 
 }
