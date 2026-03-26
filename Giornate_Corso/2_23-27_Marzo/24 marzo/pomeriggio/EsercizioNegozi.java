@@ -79,7 +79,7 @@ public class EsercizioNegozi {
         int sceltaNegozio = scannerNum.nextInt();
         System.out.println("Quale prodotto vuoi vendere? ");
         String vendiProdotto =  scannerStr.nextLine();
-        if (negozi[sceltaNegozio].prodotto.equals(vendiProdotto)) {
+        if (negozi[sceltaNegozio].prodotto.nome.equals(vendiProdotto)) {
             System.out.println("Quantità? ");
             //negozi[sceltaNegozio].prodotto = ?
         } else {
