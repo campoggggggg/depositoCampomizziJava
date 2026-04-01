@@ -187,7 +187,7 @@ class ComponenteFinitura {
     public String getColore(){
         return colore;
     }
-    public void setcolore(String colore) {
+    public void setColore(String colore) {
         if (colore.isEmpty()) {
             System.out.println("Il colore non può essere vuoto.");
         } else {
@@ -293,17 +293,6 @@ class Completo {
         return nome;
     }
 
-    public void mostraCompleto () {
-        System.out.println("\n####CAPI PRINCIPALI####\n");
-        for (CapoPrincipale c : capi) {
-            c.mostraDettagli();
-        }
-        System.out.println("\n#######FINITURE#######\n");
-        for (ComponenteFinitura f : finiture) {
-            f.mostraDettagli();
-        } 
-    }
-
     public float prezzoTotale() {
         float tot = 0;
 
@@ -315,6 +304,21 @@ class Completo {
             tot += f.getPrezzo();
         }
         return tot;
+    }
+
+    public void mostraCompleto () {
+        System.out.println("\n---Nome del completo: " + nome + "---");
+        System.out.println("\n####CAPI PRINCIPALI####\n");
+        for (CapoPrincipale c : capi) {
+            c.mostraDettagli();
+        }
+        System.out.println("\n#######FINITURE#######\n");
+        for (ComponenteFinitura f : finiture) {
+            f.mostraDettagli();
+        } 
+
+        System.out.println("Il prezzzo totale è: " + prezzoTotale());
+        System.out.println("############################");
     }
 }
 
@@ -426,7 +430,7 @@ public class GestoreSartoria {
 
             if (scelta >= 1 && scelta <= completi.size()) {
                 completi.get(scelta - 1).mostraCompleto();
-                System.out.println("Prezzo totale: " + completi.get(scelta - 1).prezzoTotale());
+                //System.out.println("Prezzo totale: " + completi.get(scelta - 1).prezzoTotale());
             } else if (scelta == 0) {
                 continua = false;
             } else {
