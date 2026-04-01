@@ -1,6 +1,6 @@
-///due famiglie di ogg diverse. una per i capi principali;
-// una per le rifinitura
-//setter controlla che prezzo sia maggiore di 0 e robe non vuote
+import java.util.ArrayList;
+import java.util.Scanner;
+
 class CapoPrincipale {
     private int codice;
     private static int codiceCounter = 0;
@@ -156,7 +156,7 @@ class ComponenteFinitura {
         this.codice = ++codiceCounter;
     }
 
-    public int getNome() {
+    public String getNome() {
         return nome;
     }
     public void setNome(String nome) {
@@ -194,7 +194,7 @@ class ComponenteFinitura {
     }
     public void setPrezzo(float prezzo) {
         if (prezzo <= 0) {
-            System.out.println("Il prezzo deve essere maggiore di 0.")
+            System.out.println("Il prezzo deve essere maggiore di 0.");
         } else {
             this.prezzo = prezzo;
         }
@@ -264,6 +264,8 @@ public class GestoreSartoria {
         ArrayList<CapoPrincipale> capi = new ArrayList<>();
         ArrayList<ComponenteFinitura> finiture = new ArrayList<>();
 
-        
+        ///popola gli arraylist
+        ///stampa per vedere come si comporta. Evidenzia mostraDettagli
+        ///differenti per sottoclassi differenti.
     }
 }
