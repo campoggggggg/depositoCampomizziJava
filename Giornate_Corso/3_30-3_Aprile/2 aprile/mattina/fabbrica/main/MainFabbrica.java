@@ -49,10 +49,56 @@ public class MainFabbrica {
                 case 2: 
                     System.out.println("Inserisci nome macchina: ");
                     String nomeMacchina = scannerStr.nextLine();
-
-                    //riprendi qui. finisci logica crea macchina. poi login: nome -> riconosce ruolo, chiede una di 3 azioni 
+                    macchine.add(new Macchina(nomeMacchina, false));
+                    
                     break;
-                case 3: // login + azione
+//                    login: nome -> riconosce ruolo, chiede una di 3 azioni 
+                case 3: 
+                    
+                    
+                    boolean continua4 = true;
+
+                    
+                    System.out.println("Inserisci il tuo nome");
+                    String nomeLogin = scannerStr.nextLine();
+
+                    Operaio operaioTrovato = null;
+                    for (Operaio o : operai) {
+                        if (o.getNome().equals(nomeLogin)) {
+                            operaioTrovato = o;
+                        } else {
+                            System.out.println("Nome non presente nel sistema. Riprova");
+                        }
+                    }
+                    
+
+                    while (continua4) {
+                        System.out.println("Scegli che operazione fare: ");
+                        System.out.println("1. Accendi una macchina");
+                        System.out.println("2. Spegni una macchina");
+                        System.out.println("3. Stampa stato di una macchina");
+                        System.out.println("0. Logout");
+
+                        int operazione = scannerNum.nextInt();
+                        
+                        switch (operazione) {
+                            case 1:
+                                if (operaioTrovato instanceof OperaioSpecial) {
+                                    for (int i = 0; i < macchine.size(); i++) {
+                                        System.out.println(i + ". " + macchine.get(i).getNome());
+                                    }
+                                    int index = scannerNum.nextInt();
+                                    operaioTrovato.lavora(macchine.get(index));
+                                } else {
+                                    System.out.println("Accesso non consentito");
+                                }
+                                break;
+                        
+                            default:
+                                break;
+                        }
+                    }
+                    //manca case 2 e 3 ma seguono logica simile a 1
                     break;
                 case 0:
                     continua = false;
