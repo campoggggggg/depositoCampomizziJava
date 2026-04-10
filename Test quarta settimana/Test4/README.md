@@ -27,7 +27,6 @@ src/
 │   ├── ProductDecorator.java
 │   ├── ColorDecorator.java
 │   ├── SizeDecorator.java
-│   └── ProductVariants.java  (costanti colori/taglie)
 ├── factory/
 │   └── UserFactory.java
 ├── facade/
@@ -42,16 +41,6 @@ src/
     ├── DiscountStrategy.java (interface)
     ├── NoDiscount.java
     └── ProDiscount.java
-```
-
----
-
-## Setup del database MySQL
-
-Eseguire il file `setup.sql` allegato:
-
-```bash
-mysql -u root -p < setup.sql
 ```
 
 ---
