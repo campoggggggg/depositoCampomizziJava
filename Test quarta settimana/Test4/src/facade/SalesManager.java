@@ -128,20 +128,19 @@ public class SalesManager {
         } catch (SQLException e) { e.printStackTrace(); }
     }
 
-    // 
     public void purchase(User user, int productId, String color, String size, int shipmentId) {
         try {
-            Product base = getProductById(productId);
+            Product base = getProductById(productId); //check base su esistenza
             if (base == null) { System.out.println("Prodotto non trovato."); return; }
             if (base.getQuantity() < 1) { System.out.println("Prodotto esaurito."); return; }
 
             Product decorated = new ColorDecorator(new SizeDecorator(base, size), color);
             System.out.println("Prodotto selezionato: " + decorated.getDescription());
 
-            double price = user.applyDiscount(base.getPrice());
+            double price = user.applyDiscount(base.getPrice()); //applica sconto in base all'utente
             double shipmentCost = 0;
 
-            if (price > 100) {
+            if (price > 100) { //sped gratis e settata a express se spende piu di 100
                 shipmentId = getExpressShipmentId();
                 System.out.println("Totale superiore a EUR 100 garantisce una spedizione Express gratuita!");
             } else {
@@ -154,7 +153,7 @@ public class SalesManager {
             double total = price + shipmentCost;
             System.out.printf("Totale finale: EUR %.2f%n", total);
 
-            PreparedStatement ps = conn.prepareStatement(
+            PreparedStatement ps = conn.prepareStatement( //qui aggiorna la tabella sales
                 "INSERT INTO sales(user_id, product_id, shipment_id, quantity_bought, total_price) VALUES(?,?,?,1,?)"
             );
             ps.setInt(1, user.getId());
@@ -163,7 +162,7 @@ public class SalesManager {
             ps.setDouble(4, total);
             ps.executeUpdate();
 
-            updateQuantity(productId, base.getQuantity() - 1);
+            updateQuantity(productId, base.getQuantity() - 1); //qui aggiorna le quantità disponibili (-1 perche il prodotto è stato venduto)
             System.out.println("Acquisto completato.");
 
         } catch (SQLException e) { e.printStackTrace(); }
@@ -247,4 +246,22 @@ public class SalesManager {
             }
         } catch (SQLException e) { e.printStackTrace(); }
     }
+
+
+    //array per aggiungere colore e taglia. usati in App.java
+
+    public static final String[] COLORS = {"BIANCO", "NERO", "ROSSO"};
+    public static final String[] SIZES  = {"S", "M", "L", "XL"};
+
+    //funzioni per check colore/taglia nel menu in App.java
+    public boolean isValidColor(String color) {
+        for (String c : COLORS) if (c.equalsIgnoreCase(color)) return true;
+        return false;
+    }
+
+    public boolean isValidSize(String size) {
+        for (String s : SIZES) if (s.equalsIgnoreCase(size)) return true;
+        return false;
+    }
+
 }

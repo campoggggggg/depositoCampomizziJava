@@ -1,4 +1,3 @@
-import decorator.ProductVariants;
 import facade.SalesManager;
 import model.*;
 
@@ -127,12 +126,12 @@ public class App {
         System.out.println("Colori disponibili: BIANCO, NERO, ROSSO");
         System.out.print("Colore: ");
         String color = sc.nextLine().toUpperCase();
-        if (!ProductVariants.isValidColor(color)) { System.out.println("Colore non valido."); return; }
+        if (!manager.isValidColor(color)) { System.out.println("Colore non valido."); return; }
 
         System.out.println("Taglie disponibili: S, M, L, XL");
         System.out.print("Taglia: ");
         String size = sc.nextLine().toUpperCase();
-        if (!ProductVariants.isValidSize(size)) { System.out.println("Taglia non valida."); return; }
+        if (!manager.isValidSize(size)) { System.out.println("Taglia non valida."); return; }
 
         double pricePreview = manager.getProductById(idP).getPrice();
         double discounted = user.applyDiscount(pricePreview);

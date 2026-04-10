@@ -3,9 +3,9 @@ package db;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
-/*
-Singleton che serve a connettersi al DB su mySQL per gestire le tabelle e il gestionale
-*/
+
+//Singleton che serve a connettersi al DB su mySQL per gestire le tabelle e il gestionale
+
 public class DatabaseManager {
 
     private static DatabaseManager instance;
