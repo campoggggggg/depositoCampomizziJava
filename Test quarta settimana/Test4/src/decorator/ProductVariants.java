@@ -1,5 +1,6 @@
 package decorator;
 
+//array che i decorator usano per aggiungere colore e taglia.
 public class ProductVariants {
     public static final String[] COLORS = {"BIANCO", "NERO", "ROSSO"};
     public static final String[] SIZES  = {"S", "M", "L", "XL"};

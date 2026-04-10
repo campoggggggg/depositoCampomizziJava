@@ -15,7 +15,7 @@ public class SalesManager {
         this.conn = DatabaseManager.getInstance().getConnection();
     }
 
-    // AUTH
+    // login
     public User login(String username, String password) {
         try {
             PreparedStatement ps = conn.prepareStatement(
@@ -36,6 +36,7 @@ public class SalesManager {
         return null;
     }
 
+    //registra nuovo utente e lo inserisce nella tabella users
     public void registerUser(String username, String password, String type) {
         try {
             PreparedStatement ps = conn.prepareStatement(
@@ -49,7 +50,7 @@ public class SalesManager {
         } catch (SQLException e) { e.printStackTrace(); }
     }
 
-    // PRODOTTI
+    // lista di tutti i prodotti
     public ArrayList<Product> getAllProducts() {
         ArrayList<Product> list = new ArrayList<>();
         try {
@@ -69,6 +70,7 @@ public class SalesManager {
         return list;
     }
 
+    //prende prodotto con ID
     public Product getProductById(int id) {
         try {
             PreparedStatement ps = conn.prepareStatement("SELECT * FROM products WHERE id=?");
@@ -88,6 +90,7 @@ public class SalesManager {
         return null;
     }
 
+    //cambia prezzo a prod nel db
     public void updatePrice(int productId, double newPrice) {
         try {
             PreparedStatement ps = conn.prepareStatement(
@@ -100,6 +103,7 @@ public class SalesManager {
         } catch (SQLException e) { e.printStackTrace(); }
     }
 
+    //aggiorna qnt prod nel db
     public void updateQuantity(int productId, int newQuantity) {
         try {
             PreparedStatement ps = conn.prepareStatement(
@@ -124,7 +128,7 @@ public class SalesManager {
         } catch (SQLException e) { e.printStackTrace(); }
     }
 
-    // ACQUISTO
+    // 
     public void purchase(User user, int productId, String color, String size, int shipmentId) {
         try {
             Product base = getProductById(productId);
@@ -139,7 +143,7 @@ public class SalesManager {
 
             if (price > 100) {
                 shipmentId = getExpressShipmentId();
-                System.out.println("Totale > €100: spedizione Express gratuita applicata.");
+                System.out.println("Totale superiore a EUR 100 garantisce una spedizione Express gratuita!");
             } else {
                 PreparedStatement ps2 = conn.prepareStatement("SELECT cost FROM shipments WHERE id=?");
                 ps2.setInt(1, shipmentId);
@@ -148,7 +152,7 @@ public class SalesManager {
             }
 
             double total = price + shipmentCost;
-            System.out.printf("Totale finale: €%.2f%n", total);
+            System.out.printf("Totale finale: EUR %.2f%n", total);
 
             PreparedStatement ps = conn.prepareStatement(
                 "INSERT INTO sales(user_id, product_id, shipment_id, quantity_bought, total_price) VALUES(?,?,?,1,?)"
@@ -165,6 +169,7 @@ public class SalesManager {
         } catch (SQLException e) { e.printStackTrace(); }
     }
 
+    //serve a forzare una Express gratis quando un User PRO supera 100 euro
     private int getExpressShipmentId() {
         try {
             PreparedStatement ps = conn.prepareStatement("SELECT id FROM shipments WHERE type='EXPRESS'");
@@ -174,20 +179,21 @@ public class SalesManager {
         return 1;
     }
 
+    //restituisce le opzioni di spedizione disponibili
     public ArrayList<int[]> getShipments() {
         ArrayList<int[]> list = new ArrayList<>();
         try {
             Statement st = conn.createStatement();
             ResultSet rs = st.executeQuery("SELECT * FROM shipments");
             while (rs.next()) {
-                System.out.println("[" + rs.getInt("id") + "] " + rs.getString("type") + " €" + rs.getDouble("cost"));
+                System.out.println("[" + rs.getInt("id") + "] " + rs.getString("type") + " EUR " + rs.getDouble("cost"));
                 list.add(new int[]{rs.getInt("id")});
             }
         } catch (SQLException e) { e.printStackTrace(); }
         return list;
     }
 
-    // VENDITE
+    // mostra le vendite effettuate, registrate nella tabella sales.
     public void showAllSales() {
         try {
             Statement st = conn.createStatement();
@@ -198,17 +204,23 @@ public class SalesManager {
                 "JOIN products p ON s.product_id=p.id " +
                 "JOIN shipments sh ON s.shipment_id=sh.id"
             );
+
+            if (!rs.next()) {
+            System.out.println("Non è successo niente...");
+            return;
+        }
             while (rs.next()) {
-                System.out.println("Vendita#" + rs.getInt("s.id") +
+                System.out.println("Vendita #" + rs.getInt("s.id") +
                     " | " + rs.getString("u.username") +
                     " | " + rs.getString("p.name") +
                     " | " + rs.getString("sh.type") +
-                    " | €" + rs.getDouble("s.total_price") +
+                    " | EUR " + String.format("%.2f", rs.getDouble("total_price")) +
                     " | " + rs.getString("s.sale_date"));
             }
         } catch (SQLException e) { e.printStackTrace(); }
     }
 
+    //mostra vendite da tabella sales quando id_user = 1 a quello del login attuale
     public void showUserSales(int userId) {
         try {
             PreparedStatement ps = conn.prepareStatement(
@@ -220,11 +232,17 @@ public class SalesManager {
             );
             ps.setInt(1, userId);
             ResultSet rs = ps.executeQuery();
+
+            if (!rs.next()) {
+            System.out.println("Non è successo niente...");
+            return;
+            }
+
             while (rs.next()) {
                 System.out.println("Vendita#" + rs.getInt("s.id") +
                     " | " + rs.getString("p.name") +
                     " | " + rs.getString("sh.type") +
-                    " | €" + rs.getDouble("s.total_price") +
+                    " | EUR " + String.format("%.2f", rs.getDouble("total_price")) +
                     " | " + rs.getString("s.sale_date"));
             }
         } catch (SQLException e) { e.printStackTrace(); }

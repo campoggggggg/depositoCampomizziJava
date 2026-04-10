@@ -37,7 +37,17 @@ public class App {
             switch (scelta) {
                 case 1:
                     ArrayList<Product> products = manager.getAllProducts();
-                    for (Product pr : products) System.out.println(pr);
+                    //mostro prezzo scontato se user è PRO
+                    for (Product pr : products) {
+                        double base = pr.getPrice();
+                        double discounted = user.applyDiscount(base);
+
+                        System.out.println(
+                            pr.getName() +
+                            " | " + pr.getDescription() +
+                            " | Prezzo: EUR " + discounted
+                        );
+                    }
                     break;
                 case 2:
                     acquisto(user);
