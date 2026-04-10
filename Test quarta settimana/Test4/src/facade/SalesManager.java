@@ -1,0 +1,232 @@
+package facade;
+
+import db.DatabaseManager;
+import decorator.*;
+import factory.UserFactory;
+import model.*;
+
+import java.sql.*;
+import java.util.ArrayList;
+
+public class SalesManager {
+    private Connection conn;
+
+    public SalesManager() {
+        this.conn = DatabaseManager.getInstance().getConnection();
+    }
+
+    // AUTH
+    public User login(String username, String password) {
+        try {
+            PreparedStatement ps = conn.prepareStatement(
+                "SELECT * FROM users WHERE username=? AND password=?"
+            );
+            ps.setString(1, username);
+            ps.setString(2, password);
+            ResultSet rs = ps.executeQuery();
+            if (rs.next()) {
+                return UserFactory.create(
+                    rs.getInt("id"),
+                    rs.getString("username"),
+                    rs.getString("password"),
+                    rs.getString("type")
+                );
+            }
+        } catch (SQLException e) { e.printStackTrace(); }
+        return null;
+    }
+
+    public void registerUser(String username, String password, String type) {
+        try {
+            PreparedStatement ps = conn.prepareStatement(
+                "INSERT INTO users(username, password, type) VALUES(?,?,?)"
+            );
+            ps.setString(1, username);
+            ps.setString(2, password);
+            ps.setString(3, type.toUpperCase());
+            ps.executeUpdate();
+            System.out.println("Utente registrato.");
+        } catch (SQLException e) { e.printStackTrace(); }
+    }
+
+    // PRODOTTI
+    public ArrayList<Product> getAllProducts() {
+        ArrayList<Product> list = new ArrayList<>();
+        try {
+            Statement st = conn.createStatement();
+            ResultSet rs = st.executeQuery("SELECT * FROM products");
+            while (rs.next()) {
+                list.add(new Product(
+                    rs.getInt("id"),
+                    rs.getString("name"),
+                    rs.getString("description"),
+                    rs.getDouble("price"),
+                    rs.getInt("quantity"),
+                    rs.getInt("category_id")
+                ));
+            }
+        } catch (SQLException e) { e.printStackTrace(); }
+        return list;
+    }
+
+    public Product getProductById(int id) {
+        try {
+            PreparedStatement ps = conn.prepareStatement("SELECT * FROM products WHERE id=?");
+            ps.setInt(1, id);
+            ResultSet rs = ps.executeQuery();
+            if (rs.next()) {
+                return new Product(
+                    rs.getInt("id"),
+                    rs.getString("name"),
+                    rs.getString("description"),
+                    rs.getDouble("price"),
+                    rs.getInt("quantity"),
+                    rs.getInt("category_id")
+                );
+            }
+        } catch (SQLException e) { e.printStackTrace(); }
+        return null;
+    }
+
+    public void updatePrice(int productId, double newPrice) {
+        try {
+            PreparedStatement ps = conn.prepareStatement(
+                "UPDATE products SET price=? WHERE id=?"
+            );
+            ps.setDouble(1, newPrice);
+            ps.setInt(2, productId);
+            ps.executeUpdate();
+            System.out.println("Prezzo aggiornato.");
+        } catch (SQLException e) { e.printStackTrace(); }
+    }
+
+    public void updateQuantity(int productId, int newQuantity) {
+        try {
+            PreparedStatement ps = conn.prepareStatement(
+                "UPDATE products SET quantity=? WHERE id=?"
+            );
+            ps.setInt(1, newQuantity);
+            ps.setInt(2, productId);
+            ps.executeUpdate();
+            System.out.println("Quantità aggiornata.");
+        } catch (SQLException e) { e.printStackTrace(); }
+    }
+
+    public void updateDescription(int productId, String newDescription) {
+        try {
+            PreparedStatement ps = conn.prepareStatement(
+                "UPDATE products SET description=? WHERE id=?"
+            );
+            ps.setString(1, newDescription);
+            ps.setInt(2, productId);
+            ps.executeUpdate();
+            System.out.println("Descrizione aggiornata.");
+        } catch (SQLException e) { e.printStackTrace(); }
+    }
+
+    // ACQUISTO
+    public void purchase(User user, int productId, String color, String size, int shipmentId) {
+        try {
+            Product base = getProductById(productId);
+            if (base == null) { System.out.println("Prodotto non trovato."); return; }
+            if (base.getQuantity() < 1) { System.out.println("Prodotto esaurito."); return; }
+
+            Product decorated = new ColorDecorator(new SizeDecorator(base, size), color);
+            System.out.println("Prodotto selezionato: " + decorated.getDescription());
+
+            double price = user.applyDiscount(base.getPrice());
+            double shipmentCost = 0;
+
+            if (price > 100) {
+                shipmentId = getExpressShipmentId();
+                System.out.println("Totale > €100: spedizione Express gratuita applicata.");
+            } else {
+                PreparedStatement ps2 = conn.prepareStatement("SELECT cost FROM shipments WHERE id=?");
+                ps2.setInt(1, shipmentId);
+                ResultSet rs2 = ps2.executeQuery();
+                if (rs2.next()) shipmentCost = rs2.getDouble("cost");
+            }
+
+            double total = price + shipmentCost;
+            System.out.printf("Totale finale: €%.2f%n", total);
+
+            PreparedStatement ps = conn.prepareStatement(
+                "INSERT INTO sales(user_id, product_id, shipment_id, quantity_bought, total_price) VALUES(?,?,?,1,?)"
+            );
+            ps.setInt(1, user.getId());
+            ps.setInt(2, productId);
+            ps.setInt(3, shipmentId);
+            ps.setDouble(4, total);
+            ps.executeUpdate();
+
+            updateQuantity(productId, base.getQuantity() - 1);
+            System.out.println("Acquisto completato.");
+
+        } catch (SQLException e) { e.printStackTrace(); }
+    }
+
+    private int getExpressShipmentId() {
+        try {
+            PreparedStatement ps = conn.prepareStatement("SELECT id FROM shipments WHERE type='EXPRESS'");
+            ResultSet rs = ps.executeQuery();
+            if (rs.next()) return rs.getInt("id");
+        } catch (SQLException e) { e.printStackTrace(); }
+        return 1;
+    }
+
+    public ArrayList<int[]> getShipments() {
+        ArrayList<int[]> list = new ArrayList<>();
+        try {
+            Statement st = conn.createStatement();
+            ResultSet rs = st.executeQuery("SELECT * FROM shipments");
+            while (rs.next()) {
+                System.out.println("[" + rs.getInt("id") + "] " + rs.getString("type") + " €" + rs.getDouble("cost"));
+                list.add(new int[]{rs.getInt("id")});
+            }
+        } catch (SQLException e) { e.printStackTrace(); }
+        return list;
+    }
+
+    // VENDITE
+    public void showAllSales() {
+        try {
+            Statement st = conn.createStatement();
+            ResultSet rs = st.executeQuery(
+                "SELECT s.id, u.username, p.name, sh.type, s.total_price, s.sale_date " +
+                "FROM sales s " +
+                "JOIN users u ON s.user_id=u.id " +
+                "JOIN products p ON s.product_id=p.id " +
+                "JOIN shipments sh ON s.shipment_id=sh.id"
+            );
+            while (rs.next()) {
+                System.out.println("Vendita#" + rs.getInt("s.id") +
+                    " | " + rs.getString("u.username") +
+                    " | " + rs.getString("p.name") +
+                    " | " + rs.getString("sh.type") +
+                    " | €" + rs.getDouble("s.total_price") +
+                    " | " + rs.getString("s.sale_date"));
+            }
+        } catch (SQLException e) { e.printStackTrace(); }
+    }
+
+    public void showUserSales(int userId) {
+        try {
+            PreparedStatement ps = conn.prepareStatement(
+                "SELECT s.id, p.name, sh.type, s.total_price, s.sale_date " +
+                "FROM sales s " +
+                "JOIN products p ON s.product_id=p.id " +
+                "JOIN shipments sh ON s.shipment_id=sh.id " +
+                "WHERE s.user_id=?"
+            );
+            ps.setInt(1, userId);
+            ResultSet rs = ps.executeQuery();
+            while (rs.next()) {
+                System.out.println("Vendita#" + rs.getInt("s.id") +
+                    " | " + rs.getString("p.name") +
+                    " | " + rs.getString("sh.type") +
+                    " | €" + rs.getDouble("s.total_price") +
+                    " | " + rs.getString("s.sale_date"));
+            }
+        } catch (SQLException e) { e.printStackTrace(); }
+    }
+}
