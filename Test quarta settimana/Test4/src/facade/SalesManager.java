@@ -90,6 +90,24 @@ public class SalesManager {
         return null;
     }
 
+    //filtra per categoria
+    public ArrayList<Product> getProductsByCategory (int categoryId) {
+        ArrayList<Product> list = new ArrayList<>();
+
+        try {
+            PreparedStatement ps = conn.prepareStatement("SELECT * FROM products WHERE category_id=?");
+            ps.setInt(1, categoryId);
+            ResultSet rs = ps.executeQuery();
+            while (rs.next()) {
+                list.add(new Product(
+                    rs.getInt("id"), rs.getString("name"), rs.getString("description"),
+                    rs.getDouble("price"), rs.getInt("quantity"), rs.getInt("category_id")
+                ));
+            }
+        } catch (SQLException e) { e.printStackTrace(); }
+        return list;
+    }
+
     //cambia prezzo a prod nel db
     public void updatePrice(int productId, double newPrice) {
         try {
@@ -128,6 +146,7 @@ public class SalesManager {
         } catch (SQLException e) { e.printStackTrace(); }
     }
 
+    //modifica il db dopo l'acquisto di un articolo
     public void purchase(User user, int productId, String color, String size, int shipmentId) {
         try {
             Product base = getProductById(productId); //check base su esistenza
@@ -264,4 +283,25 @@ public class SalesManager {
         return false;
     }
 
+    //controllo messaggio di errore se l'utente inserisce un ID spedizione non valido
+    public boolean isValidShipmentId(int id) {
+        try {
+            PreparedStatement ps = conn.prepareStatement("SELECT id FROM shipmets WHERE id=?");
+            ps.setInt(1, id);
+            ResultSet rs = ps.executeQuery();
+            return rs.next();
+        } catch (SQLException e) { e.printStackTrace(); }
+        return false;
+    }
+
+    //controllo messaggio di errore se l'utente ADMIN inserisce un ID prodotto non valido
+    public boolean productExists(int id) {
+    try {
+        PreparedStatement ps = conn.prepareStatement("SELECT id FROM products WHERE id=?");
+        ps.setInt(1, id);
+        ResultSet rs = ps.executeQuery();
+        return rs.next();
+    } catch (SQLException e) { e.printStackTrace(); }
+    return false;
+}
 }

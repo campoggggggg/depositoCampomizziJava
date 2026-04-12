@@ -12,7 +12,8 @@ public class ProUser extends User {
         System.out.println("=== MENU UTENTE PRO ===");
         System.out.println("1. Visualizza prodotti");
         System.out.println("2. Acquista prodotto (sconto 5%)");
-        System.out.println("3. Storico acquisti");
+        System.out.println("3. Filtra per categoria");
+        System.out.println("4. Storico acquisti");
         System.out.println("0. Logout");
     }
 }

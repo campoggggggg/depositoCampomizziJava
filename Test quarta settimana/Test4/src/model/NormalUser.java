@@ -12,6 +12,7 @@ public class NormalUser extends User {
         System.out.println("=== MENU UTENTE NORMALE ===");
         System.out.println("1. Visualizza prodotti");
         System.out.println("2. Acquista prodotto");
+        System.out.println("3. Filtra per categoria");
         System.out.println("0. Logout");
     }
 }
